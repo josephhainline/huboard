@@ -23,8 +23,6 @@ module Huboard
     post '/:user/:repo/reorderissue' do 
       issue = params["issue"]
       json pebble.reorder_issue params[:user], params[:repo], issue["number"], params[:index]
-
-      json pebble.log_issue_changed_state params[:user], params[:repo], params[:issue][:number], params[:index], params[:index]
     end
 
     post '/:user/:repo/reordermilestone' do 
@@ -35,6 +33,8 @@ module Huboard
     post '/:user/:repo/movecard' do 
       publish "#{params[:user]}/#{params[:repo]}", "Moved.#{params[:issue][:number]}", { issue:params[:issue], index: params[:index]}
       json pebble.move_card params[:user], params[:repo], params[:issue], params[:index]
+
+      json pebble.log_issue_changed_state params[:user], params[:repo], params[:issue][:number], params[:index], params[:index]
     end
 
     post '/:user/:repo/close' do                                                               

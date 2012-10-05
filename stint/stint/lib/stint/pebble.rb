@@ -82,7 +82,7 @@ module Stint
       puts ")..."
 
       post_data = {"number" => issue[:number]}
-      _data = embedded_data issue["body"]
+      _data = embedded_state_data issue["body"]
       if _data.empty?
         post_data["body"] = issue["body"].concat "\r\n<!--\r\n@huvelocity:#{JSON.dump({:from_state_index => :to_state_index})}\r\n-->\r\n"
       else
@@ -95,7 +95,7 @@ module Stint
     def reorder_milestone(user_name, repo, number, index, status)
       post_data = {:number => number}
       milestone = github.milestone user_name, repo, number
-      _data = embedded_data milestone["description"]
+      _data = embedded_order_data milestone["description"]
       if _data.empty?
         post_data["description"] = milestone["description"].concat "\r\n<!---\r\n@huboard:#{JSON.dump({"status" => status,"order" => index.to_f})}\r\n-->\r\n" 
       else
@@ -222,8 +222,6 @@ module Stint
       issue["labels"] = issue["labels"].delete_if { |l| l["name"] == state["name"] }
 
       github.update_issue user_name, repo, {"number" => issue["number"], "labels" => issue["labels"]}
-
-      self.log_issue_changed_state(user_name, repo, the_issue, 1, index)
     end
 
     def milestones(user_name, repo)
@@ -239,9 +237,21 @@ module Stint
       milestones.sort_by { |m| m["_data"]["order"] || m["number"].to_f}
     end
 
-    def embedded_data(body)
+    def embedded_order_data(body)
       r = /@huboard:(.*)/
         match = r.match body
+      return { } if match.nil?
+
+      begin
+        JSON.load(match[1])
+      rescue
+        return {}
+      end
+    end
+
+    def embedded_state_data(body)
+      r = /@huvelocity:(.*)/
+      match = r.match body
       return { } if match.nil?
 
       begin
