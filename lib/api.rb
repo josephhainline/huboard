@@ -21,8 +21,10 @@ module Huboard
     end
 
     post '/:user/:repo/reorderissue' do 
-      milestone = params["issue"]
-      json pebble.reorder_issue params[:user], params[:repo], milestone["number"], params[:index]
+      issue = params["issue"]
+      json pebble.reorder_issue params[:user], params[:repo], issue["number"], params[:index]
+
+      json pebble.log_issue_changed_state params[:user], params[:repo], params[:issue][:number], params[:index], params[:index]
     end
 
     post '/:user/:repo/reordermilestone' do 

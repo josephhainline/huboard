@@ -63,15 +63,30 @@ module Stint
       issues.sort_by { |i| i["_data"]["order"] || i["number"].to_f}
     end
 
-    def reorder_issue(user_name, repo, number, index)
-
-      post_data = {"number" => number}
-      issue = github.issue_by_id user_name, repo, number
+    def reorder_issue(user_name, repo, issue_number, index)
+      post_data = {"number" => issue_number}
+      issue = github.issue_by_id user_name, repo, issue_number
       _data = embedded_data issue["body"]
       if _data.empty?
-        post_data["body"] = issue["body"].concat "\r\n<!---\r\n@huboard:#{JSON.dump({:order => index.to_f})}\r\n-->\r\n" 
+        post_data["body"] = issue["body"].concat "\r\n<!--\r\n@huboard:#{JSON.dump({:order => index.to_f})}\r\n-->\r\n"
       else
         post_data["body"] = issue["body"].gsub /@huboard:.*/, "@huboard:#{JSON.dump(_data.merge({"order" => index.to_f}))}"
+      end
+
+      github.update_issue user_name, repo, post_data
+    end
+
+    def log_issue_changed_state(user_name, repo, issue, from_state_index, to_state_index)
+      puts "log_issue_changed_state called..."
+      puts "with (", user_name, repo, issue, from_state_index, to_state_index
+      puts ")..."
+
+      post_data = {"number" => issue[:number]}
+      _data = embedded_data issue["body"]
+      if _data.empty?
+        post_data["body"] = issue["body"].concat "\r\n<!--\r\n@huvelocity:#{JSON.dump({:from_state_index => :to_state_index})}\r\n-->\r\n"
+      else
+        post_data["body"] = issue["body"].gsub /@huvelocity:.*:/, "@huvelocity:#{JSON.dump(_data.merge({from_state_index => :to_state_index}))}"
       end
 
       github.update_issue user_name, repo, post_data
@@ -192,20 +207,23 @@ module Stint
     end
 
     def move_card(user_name, repo, the_issue, index)
+
       labels = github.labels user_name, repo
 
-      new_state = labels.find { |l| /#{index}\s*- *.+/.match(l["name"]) }
+      # find the label for the index we're moving to
+      new_state_label = labels.find { |l| /#{index}\s*- *.+/.match(l["name"]) }
 
-        issue = github.issue_by_id user_name, repo, the_issue["number"]
+      issue = github.issue_by_id user_name, repo, the_issue["number"]
 
       state = current_state(issue)
 
-      issue["labels"] << new_state unless new_state.nil?
+      issue["labels"] << new_state_label unless new_state_label.nil?
 
       issue["labels"] = issue["labels"].delete_if { |l| l["name"] == state["name"] }
 
       github.update_issue user_name, repo, {"number" => issue["number"], "labels" => issue["labels"]}
 
+      self.log_issue_changed_state(user_name, repo, the_issue, 1, index)
     end
 
     def milestones(user_name, repo)
