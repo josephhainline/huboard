@@ -57,7 +57,7 @@ module Stint
       issues = github.get_issues user_name, repo
       issues.each do |issue|
         issue["current_state"] = current_state(issue)
-        issue["_data"] = embedded_data issue["body"]
+        issue["_data"] = embedded_order_data issue["body"]
         issue["repo"] = {owner: {login:user_name},name: repo}
       end
       issues.sort_by { |i| i["_data"]["order"] || i["number"].to_f}
@@ -66,7 +66,7 @@ module Stint
     def reorder_issue(user_name, repo, issue_number, index)
       post_data = {"number" => issue_number}
       issue = github.issue_by_id user_name, repo, issue_number
-      _data = embedded_data issue["body"]
+      _data = embedded_order_data issue["body"]
       if _data.empty?
         post_data["body"] = issue["body"].concat "\r\n<!--\r\n@huboard:#{JSON.dump({:order => index.to_f})}\r\n-->\r\n"
       else
@@ -76,17 +76,20 @@ module Stint
       github.update_issue user_name, repo, post_data
     end
 
-    def log_issue_changed_state(user_name, repo, issue, from_state_index, to_state_index)
+    def log_issue_changed_state(user_name, repo, issue, to_state_index)
+      puts ""
+      puts ""
       puts "log_issue_changed_state called..."
-      puts "with (", user_name, repo, issue, from_state_index, to_state_index
+      puts "with (", user_name, repo, issue, to_state_index
       puts ")..."
+      puts ""
 
       post_data = {"number" => issue[:number]}
       _data = embedded_state_data issue["body"]
       if _data.empty?
-        post_data["body"] = issue["body"].concat "\r\n<!--\r\n@huvelocity:#{JSON.dump({:from_state_index => :to_state_index})}\r\n-->\r\n"
+        post_data["body"] = issue["body"].concat "\r\n<!--\r\n{ huvelocity : [ #{JSON.dump({to_state_index => Time.now.getutc})} ]}\r\n-->\r\n"
       else
-        post_data["body"] = issue["body"].gsub /@huvelocity:.*:/, "@huvelocity:#{JSON.dump(_data.merge({from_state_index => :to_state_index}))}"
+        #post_data["body"] = issue["body"].gsub /{ huvelocity : [ {.*} ]}\Z/, "{ huvelocity : [ #{JSON.dump(_data.merge({to_state_index => Time.now.getutc})} ]}"
       end
 
       github.update_issue user_name, repo, post_data
@@ -231,7 +234,7 @@ module Stint
         m["pull_requests"] = m[:issues].select {|i| !i["pull_request"]["html_url"].nil?}
         m[:issues] = m[:issues].delete_if {|i| !i["pull_request"]["html_url"].nil?}
         m["open_issues"] = m[:issues].size
-        m["_data"] = embedded_data m["description"]
+        m["_data"] = embedded_order_data m["description"]
         m
       }
       milestones.sort_by { |m| m["_data"]["order"] || m["number"].to_f}
@@ -250,7 +253,7 @@ module Stint
     end
 
     def embedded_state_data(body)
-      r = /@huvelocity:(.*)/
+      r = /{ huvelocity : [ (.*) ]}/
       match = r.match body
       return { } if match.nil?
 
