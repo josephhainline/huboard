@@ -29,11 +29,11 @@ class LabelState
   end
 
   def to_json
-    "{ #{@label_index} : #{@time} }"
+    "{ \"#{@label_index}\" : \"#{@time}\" }"
   end
 
   def from_json(json_string)
-    m = /\{ (.*) : (.*) \}/.match(json_string)
+    m = /\{ "(.*)" : "(.*)" \}/.match(json_string)
     if (m.nil?)
       @time = nil
       @label_index = "error: failed to load from json"

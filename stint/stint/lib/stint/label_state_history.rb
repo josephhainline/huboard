@@ -37,7 +37,8 @@ class LabelStateHistory
   end
 
   def from_json(json_string)
-    m = /\{ 'label_state_history': \[(.*)\] \}"/.match(json_string)
+    regex_history = /\{ 'label_state_history': \[(.*)\] \}"/
+    m = regex_history.match(json_string)
     if m.nil?
       puts "m is nil"
     else
