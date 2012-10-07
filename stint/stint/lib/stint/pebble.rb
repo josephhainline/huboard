@@ -85,11 +85,23 @@ module Stint
       puts ""
 
       post_data = {"number" => issue[:number]}
-      _data = embedded_state_data issue["body"]
-      if _data.empty?
-        post_data["body"] = issue["body"].concat "\r\n<!--\r\n{ huvelocity : [ #{JSON.dump({to_state_index => Time.now.getutc})} ]}\r\n-->\r\n"
+      new_timestamp = "{'#{to_state_index}':'#{Time.now}'}"
+        #JSON.dump({to_state_index => Time.now.getutc})
+
+      body_regex = /\{ huvelocity : \[ \{(.*)\} \] \}/
+      prev_timestamps = body_regex.match issue["body"]
+
+      if prev_timestamps.nil?
+        puts "didn't find prior data"
+        post_data["body"] = issue["body"].concat "\r\n<!--\r\n{ huvelocity : [ #{new_timestamp} ] }\r\n-->\r\n"
       else
-        #post_data["body"] = issue["body"].gsub /{ huvelocity : [ {.*} ]}\Z/, "{ huvelocity : [ #{JSON.dump(_data.merge({to_state_index => Time.now.getutc})} ]}"
+        puts "found prior data"
+        puts "prev timestamps: " + prev_timestamps
+
+        new_timestamps = prev_timestamps + ", " + new_timestamp
+        puts "new timestamps: " + new_timestamps
+
+        post_data["body"] = issue["body"].gsub /\{ huvelocity : \[ \{(.*)\} \] \}/, new_timestamps
       end
 
       github.update_issue user_name, repo, post_data
@@ -242,8 +254,8 @@ module Stint
 
     def embedded_order_data(body)
       r = /@huboard:(.*)/
-        match = r.match body
-      return { } if match.nil?
+      match = r.match body
+      return {} if match.nil?
 
       begin
         JSON.load(match[1])
@@ -253,7 +265,7 @@ module Stint
     end
 
     def embedded_state_data(body)
-      r = /{ huvelocity : [ (.*) ]}/
+      r = /{ huvelocity : \[ (.*) \] }/
       match = r.match body
       return { } if match.nil?
 
