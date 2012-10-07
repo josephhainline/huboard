@@ -1,5 +1,7 @@
 require 'time'
 require 'json'
+require '/Users/josephhainline/coding/huboard/stint/stint/lib/stint/label_state_history.rb'
+
 module Stint
   class Pebble
     attr_accessor :github
@@ -85,24 +87,34 @@ module Stint
       puts ""
 
       post_data = {"number" => issue[:number]}
-      new_timestamp = "{'#{to_state_index}':'#{Time.now}'}"
-        #JSON.dump({to_state_index => Time.now.getutc})
+      label_state_history_json = LabelStateHistory.get_embedded_label_state_history(issue["body"])
 
-      body_regex = /\{ huvelocity : \[ \{(.*)\} \] \}/
-      prev_timestamps = body_regex.match issue["body"]
-
-      if prev_timestamps.nil?
-        puts "didn't find prior data"
-        post_data["body"] = issue["body"].concat "\r\n<!--\r\n{ huvelocity : [ #{new_timestamp} ] }\r\n-->\r\n"
+      if (label_state_history_json.nil?)
+        puts "no lsh found"
+        lsh = LabelStateHistory.new
+        lsh.record_state(to_state_index)
+        post_data["body"] = issue["body"].concat "\r\n<!--\r\n#{lsh.to_json}\r\n-->\r\n"
       else
-        puts "found prior data"
-        puts "prev timestamps: " + prev_timestamps
-
-        new_timestamps = prev_timestamps + ", " + new_timestamp
-        puts "new timestamps: " + new_timestamps
-
-        post_data["body"] = issue["body"].gsub /\{ huvelocity : \[ \{(.*)\} \] \}/, new_timestamps
+        puts "lsh found!"
       end
+
+      #new_timestamp = "{'#{to_state_index}':'#{Time.now}'}"
+      #
+      #body_regex = /\{ huvelocity : \[ \{(.*)\} \] \}/
+      #prev_timestamps = body_regex.match issue["body"]
+      #
+      #if prev_timestamps.nil?
+      #  puts "didn't find prior data"
+      #  post_data["body"] = issue["body"].concat "\r\n<!--\r\n{ huvelocity : [ #{new_timestamp} ] }\r\n-->\r\n"
+      #else
+      #  puts "found prior data"
+      #  puts "prev timestamps: " + prev_timestamps
+      #
+      #  new_timestamps = prev_timestamps + ", " + new_timestamp
+      #  puts "new timestamps: " + new_timestamps
+      #
+      #  post_data["body"] = issue["body"].gsub /\{ huvelocity : \[ \{(.*)\} \] \}/, new_timestamps
+      #end
 
       github.update_issue user_name, repo, post_data
     end

@@ -1,4 +1,4 @@
-#require "label_state"
+require '/Users/josephhainline/coding/huboard/stint/stint/lib/stint/label_state.rb'
 
 class LabelStateHistory
   attr_accessor :history_array
@@ -38,7 +38,7 @@ class LabelStateHistory
 
   def from_json(json_string)
     @history_array = Array.new
-    regex_history =  /{ 'label_state_history': \[(.*)\] }/
+    regex_history = /{ 'label_state_history': \[(.*)\] }/
     m = regex_history.match(json_string)
     puts "full match was: ", m[0]
     str_array = m[1].split(",")
@@ -48,4 +48,11 @@ class LabelStateHistory
       @history_array.push(label_state)
     end
   end
+
+  def self.get_embedded_label_state_history(some_string)
+    regex_history = /({ 'label_state_history': \[.*\] })/
+    m = regex_history.match(some_string)
+    return m[1] unless m.nil?
+  end
+
 end
