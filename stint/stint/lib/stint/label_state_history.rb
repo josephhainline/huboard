@@ -37,14 +37,15 @@ class LabelStateHistory
   end
 
   def from_json(json_string)
-    regex_history = /\{ 'label_state_history': \[(.*)\] \}"/
+    @history_array = Array.new
+    regex_history =  /{ 'label_state_history': \[(.*)\] }/
     m = regex_history.match(json_string)
-    if m.nil?
-      puts "m is nil"
-    else
-      puts "m is set:" + m
+    puts "full match was: ", m[0]
+    str_array = m[1].split(",")
+    str_array.each do |label_state_json|
+      puts "single entry was: ", label_state_json
+      label_state = LabelState.new(label_state_json)
+      @history_array.push(label_state)
     end
-
-    @history_array = m unless m.nil?
   end
 end
