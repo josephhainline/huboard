@@ -40,19 +40,31 @@ class LabelStateHistory
     @history_array = Array.new
     regex_history = /{ 'label_state_history': \[(.*)\] }/
     m = regex_history.match(json_string)
-    puts "full match was: ", m[0]
     str_array = m[1].split(",")
     str_array.each do |label_state_json|
-      puts "single entry was: ", label_state_json
       label_state = LabelState.new(label_state_json)
       @history_array.push(label_state)
     end
   end
 
+  def embed_label_state_history
+    return "\r\n<!---\r\n#{self.to_json}\r\n-->\r\n"
+  end
+
   def self.get_embedded_label_state_history(some_string)
-    regex_history = /({ 'label_state_history': \[.*\] })/
-    m = regex_history.match(some_string)
+    history_regex = /({ 'label_state_history': \[.*\] })/m
+    m = history_regex.match(some_string)
     return m[1] unless m.nil?
+  end
+
+  def self.get_body_without_embedded_label_state_history(some_string)
+    history_regex = /(.*)\r\n<!---\r\n\{ 'label_state_history': \[(.*?)\] \}\r\n-->\r\n(.*)/m
+    m = history_regex.match(some_string)
+    if m.nil?
+      return some_string
+    else
+      return m[1] + m[3]
+    end
   end
 
 end
