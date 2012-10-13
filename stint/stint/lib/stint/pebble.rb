@@ -116,7 +116,6 @@ module Stint
       issue["labels"].sort_by {|l| l["name"]}.reverse.find {|x| r.match(x["name"])}  || {"name" => "__nil__"}
     end
 
-
     def labels(user_name, repo) 
       response = github.labels(user_name, repo)
       labels = []

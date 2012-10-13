@@ -26,6 +26,17 @@ class LabelStateHistory
     @history_array.push new_state
   end
 
+  def record_state_if_changed(current_index)
+    if (@history_array.size > 0)
+      last_recorded_index = @history_array.last.label_index
+      if (current_index != last_recorded_index)
+        record_state(current_index)
+      end
+    else
+      record_state(current_index)
+    end
+  end
+
   def to_json
     json = "{ 'label_state_history': ["
     @history_array.each do |h|
