@@ -9,14 +9,38 @@ module Stint
     def build_board(user_name, repo)
       issues = get_issues(user_name, repo)
       issues_by_label = issues.group_by { |issue| issue["current_state"]["name"] }
+
       all_labels = labels(user_name, repo)
       all_labels = all_labels.each_with_index do |label, index|
         x = issues_by_label[label[:name]]
         label[:issues] = (x || []).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
+        #puts "\n\nlabel:"
+        #puts label
+        #puts "...\n\n"
         label
       end
 
       all_labels[0][:issues] = (issues_by_label["__nil__"] || []).concat(all_labels[0][:issues]).sort_by { |i| i["_data"]["order"] || i["number"].to_f} unless all_labels.empty?
+
+      #JWH3 added this section
+      all_labels.each do |label|
+        #puts "---------------"
+        #puts "label:"
+        #puts label
+        #puts "---------------"
+        issues = label[:issues]
+        if (issues)
+          #puts "issues:"
+          #puts issues
+          #puts "..."
+          issues.each do |issue|
+            log_issue_changed_state(user_name, repo, issue, 42)
+          end
+        else
+          puts "no issues!!!"
+        end
+      end
+      #JWH3 end
 
       {
         labels: all_labels,
@@ -39,6 +63,9 @@ module Stint
                 board[:labels].each_with_index do |label, index|
 
                   linked_issues = linked_board[:labels][index][:issues].map do |i|
+                    puts "i:"
+                    puts i
+                    puts "..."
                     i["repo"][:color] = l["color"]
                     i
                   end
@@ -79,21 +106,14 @@ module Stint
     end
 
     def log_issue_changed_state(user_name, repo, issue, to_state_index)
+      puts "log issue changed state..."
+      puts "issue is:"
+      puts issue
+      puts "to_state_index is:"
+      puts to_state_index
+      puts "..."
       post_data = {"number" => issue[:number]}
-      label_state_history_json = LabelStateHistory.get_embedded_label_state_history(issue["body"])
-
-      if (label_state_history_json.nil?)
-        lsh = LabelStateHistory.new
-        lsh.record_state(to_state_index)
-        post_data["body"] = issue["body"].concat lsh.embed_label_state_history
-      else
-        lsh = LabelStateHistory.new(label_state_history_json)
-        lsh.record_state(to_state_index)
-        body_without_history = LabelStateHistory.get_body_without_embedded_label_state_history(issue["body"])
-        post_data["body"] = body_without_history + lsh.embed_label_state_history
-      end
-
-      github.update_issue user_name, repo, {"number" => issue["number"], "labels" => issue["labels"]}
+      post_data["body"] = LabelStateHistory.get_body_with_updated_history(issue["body"], to_state_index)
 
       github.update_issue user_name, repo, post_data
     end
