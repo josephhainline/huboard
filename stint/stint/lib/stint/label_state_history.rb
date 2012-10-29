@@ -71,21 +71,7 @@ class LabelStateHistory
     end
   end
 
-  def self.get_body_with_updated_history(old_body, index)
-    lsh_json = self.get_embedded_label_state_history(old_body)
-    if (lsh_json.nil?)
-      lsh = LabelStateHistory.new
-      lsh.record_state(index)
-      return old_body + lsh.embed_label_state_history
-    else
-      lsh = LabelStateHistory.new(lsh_json)
-      lsh.record_state(index)
-      body_without_history = LabelStateHistory.get_body_without_embedded_label_state_history(old_body)
-      return body_without_history + lsh.embed_label_state_history
-    end
-  end
-
-  def self.get_body_with_updated_history_if_needed(old_body, index)
+  def self.get_body_with_state_history(old_body, index)
     lsh_json = self.get_embedded_label_state_history(old_body)
     if (lsh_json.nil?) #if nil, we'll need to record current state
       lsh = LabelStateHistory.new

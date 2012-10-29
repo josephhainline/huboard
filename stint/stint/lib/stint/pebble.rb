@@ -86,13 +86,13 @@ module Stint
 
     def log_issue_changed_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_updated_history(issue["body"], to_state_index)
+      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
     def log_issue_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_updated_history_if_needed(issue["body"], to_state_index)
+      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
