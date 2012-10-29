@@ -256,7 +256,6 @@ module Stint
       github.close_issue(user_name, repo, the_issue)
     end
 
-
     def all_repos
       the_repos = github.repos
       github.orgs.each do |org|
