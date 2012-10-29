@@ -70,13 +70,6 @@ module Stint
     end
 
     def update_issue(user_name, repo, issue)
-      puts "about to patch issue:"
-      puts gh.repos(user_name, repo).issues(issue["number"])
-      puts ""
-      puts "with post_data issue:"
-      puts issue
-      puts ""
-      puts "..."
       gh.repos(user_name, repo).issues(issue["number"]).patch(issue)
     end
 

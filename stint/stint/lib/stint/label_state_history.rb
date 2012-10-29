@@ -1,9 +1,10 @@
 require '/Users/josephhainline/coding/huboard/stint/stint/lib/stint/label_state.rb'
 
 class LabelStateHistory
-  attr_accessor :history_array
+  attr_accessor :history_array, :current_state_index
 
   def initialize (*args)
+    @current_state_index = -1
     if (args.size == 0)
       init_zero
     elsif (args.size == 1)
@@ -19,22 +20,13 @@ class LabelStateHistory
 
   def init_with_history_array(history_array)
     @history_array = history_array
+    @current_state_index = Integer(history_array[-1].label_index) # in ruby -1 index in array means last element
   end
 
   def record_state(current_index)
     new_state = LabelState.new(current_index, Time.now)
+    @current_state_index = current_index
     @history_array.push new_state
-  end
-
-  def record_state_if_changed(current_index)
-    if (@history_array.size > 0)
-      last_recorded_index = @history_array.last.label_index
-      if (current_index != last_recorded_index)
-        record_state(current_index)
-      end
-    else
-      record_state(current_index)
-    end
   end
 
   def to_json
@@ -56,6 +48,7 @@ class LabelStateHistory
       label_state = LabelState.new(label_state_json)
       @history_array.push(label_state)
     end
+    @current_state_index = Integer(@history_array[-1].label_index)
   end
 
   def embed_label_state_history
@@ -92,4 +85,21 @@ class LabelStateHistory
     end
   end
 
+  def self.get_body_with_updated_history_if_needed(old_body, index)
+    lsh_json = self.get_embedded_label_state_history(old_body)
+    if (lsh_json.nil?) #if nil, we'll need to record current state
+      lsh = LabelStateHistory.new
+      lsh.record_state(index)
+      return old_body + lsh.embed_label_state_history
+    else #if state exists, we only need to record state if it's out of date
+      lsh = LabelStateHistory.new(lsh_json)
+      if (lsh.current_state_index == index)
+        return nil
+      else
+        lsh.record_state(index)
+        body_without_history = LabelStateHistory.get_body_without_embedded_label_state_history(old_body)
+        return body_without_history + lsh.embed_label_state_history
+      end
+    end
+  end
 end

@@ -14,34 +14,15 @@ module Stint
       all_labels = all_labels.each_with_index do |label, index|
         x = issues_by_label[label[:name]]
         label[:issues] = (x || []).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
-        #puts "\n\nlabel:"
-        #puts label
-        #puts "...\n\n"
+
+        label[:issues].each do |issue|
+          log_issue_state(user_name, repo, issue, index)
+        end
+
         label
       end
 
       all_labels[0][:issues] = (issues_by_label["__nil__"] || []).concat(all_labels[0][:issues]).sort_by { |i| i["_data"]["order"] || i["number"].to_f} unless all_labels.empty?
-
-      #JWH3 added this section
-      all_labels.each do |label|
-        #puts "---------------"
-        #puts "label:"
-        #puts label
-        #puts "---------------"
-        issues = label[:issues]
-        if (issues)
-          puts "if issues passed"
-          #puts "issues:"
-          #puts issues
-          #puts "..."
-          issues.each do |issue|
-            log_issue_changed_state(user_name, repo, issue, 42)
-          end
-        else
-          puts "no issues!!!"
-        end
-      end
-      #JWH3 end
 
       {
         labels: all_labels,
@@ -64,9 +45,6 @@ module Stint
                 board[:labels].each_with_index do |label, index|
 
                   linked_issues = linked_board[:labels][index][:issues].map do |i|
-                    puts "i:"
-                    puts i
-                    puts "..."
                     i["repo"][:color] = l["color"]
                     i
                   end
@@ -107,17 +85,15 @@ module Stint
     end
 
     def log_issue_changed_state(user_name, repo, issue, to_state_index)
-      puts "log issue changed state..."
-      puts "issue is:"
-      puts issue
-      puts "to_state_index is:"
-      puts to_state_index
-      puts "..."
       post_data = {"number" => issue['number']}
-
       post_data["body"] = LabelStateHistory.get_body_with_updated_history(issue["body"], to_state_index)
+      github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
+    end
 
-      github.update_issue user_name, repo, post_data
+    def log_issue_state(user_name, repo, issue, to_state_index)
+      post_data = {"number" => issue['number']}
+      post_data["body"] = LabelStateHistory.get_body_with_updated_history_if_needed(issue["body"], to_state_index)
+      github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
     def reorder_milestone(user_name, repo, number, index, status)
