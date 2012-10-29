@@ -30,6 +30,7 @@ module Stint
         #puts "---------------"
         issues = label[:issues]
         if (issues)
+          puts "if issues passed"
           #puts "issues:"
           #puts issues
           #puts "..."
@@ -112,7 +113,8 @@ module Stint
       puts "to_state_index is:"
       puts to_state_index
       puts "..."
-      post_data = {"number" => issue[:number]}
+      post_data = {"number" => issue['number']}
+
       post_data["body"] = LabelStateHistory.get_body_with_updated_history(issue["body"], to_state_index)
 
       github.update_issue user_name, repo, post_data
