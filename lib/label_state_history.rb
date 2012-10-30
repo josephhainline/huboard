@@ -1,4 +1,4 @@
-require '/Users/josephhainline/coding/huboard/stint/stint/lib/stint/label_state.rb'
+require './lib/label_state.rb'
 
 class LabelStateHistory
   attr_accessor :history_array, :current_state_index

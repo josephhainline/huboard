@@ -1,6 +1,6 @@
 require 'time'
 require 'json'
-require '/Users/josephhainline/coding/huboard/stint/stint/lib/stint/label_state_history.rb'
+require './lib/label_state_history.rb'
 
 module Stint
   class Pebble
