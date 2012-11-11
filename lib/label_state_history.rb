@@ -1,4 +1,5 @@
 require './lib/label_state.rb'
+require 'time'
 
 class LabelStateHistory
   attr_accessor :history_array, :current_state_index
@@ -27,6 +28,21 @@ class LabelStateHistory
     new_state = LabelState.new(current_index, Time.now)
     @current_state_index = current_index
     @history_array.push new_state
+  end
+
+  def get_time_in_state(index)
+    @cumulative_time_seconds = 0.0
+
+    @history_array.each do |h|
+      if (@prev_h)
+        if (@prev_h.label_index.to_i == index.to_i)
+          @cumulative_time_seconds += (Time.parse(h.time) - Time.parse(@prev_h.time)).to_f
+        end
+      end
+      @prev_h = h
+    end
+
+    return @cumulative_time_seconds
   end
 
   def to_json
@@ -80,9 +96,11 @@ class LabelStateHistory
     else #if state exists, we only need to record state if it's out of date
       lsh = LabelStateHistory.new(lsh_json)
       if (lsh.current_state_index == index)
+        puts "Time in QA: #{lsh.get_time_in_state(7)/60} minutes."
         return nil
       else
         lsh.record_state(index)
+        puts "Time in QA: #{lsh.get_time_in_state(7)/60} minutes."
         body_without_history = LabelStateHistory.get_body_without_embedded_label_state_history(old_body)
         return body_without_history + lsh.embed_label_state_history
       end

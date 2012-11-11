@@ -86,13 +86,25 @@ module Stint
 
     def log_issue_changed_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      begin
+        post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      rescue
+        puts ""
+        puts "Crash! In log_issue_changed_state on issue: #{issue}."
+        puts ""
+      end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
     def log_issue_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      begin
+        post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      rescue
+        puts ""
+        puts "Crash! In log_issue_state on issue: #{issue}."
+        puts ""
+      end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 

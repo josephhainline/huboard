@@ -1,3 +1,5 @@
+require 'time'
+
 class LabelState
   attr_accessor :time, :label_index
 
