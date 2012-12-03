@@ -68,7 +68,7 @@ class LabelStateHistory
   end
 
   def embed_label_state_history
-    return "\r\n\r\n<!---\r\n#{self.to_json}\r\n-->\r\n"
+    return ""
   end
 
   def self.get_embedded_label_state_history(some_string)
@@ -95,15 +95,10 @@ class LabelStateHistory
       return old_body + lsh.embed_label_state_history
     else #if state exists, we only need to record state if it's out of date
       lsh = LabelStateHistory.new(lsh_json)
-      if (lsh.current_state_index == index)
-        puts "Time in QA: #{lsh.get_time_in_state(7)/60} minutes."
-        return nil
-      else
         lsh.record_state(index)
         puts "Time in QA: #{lsh.get_time_in_state(7)/60} minutes."
         body_without_history = LabelStateHistory.get_body_without_embedded_label_state_history(old_body)
         return body_without_history + lsh.embed_label_state_history
-      end
     end
   end
 end
