@@ -44,7 +44,7 @@ module Stint
                 next if linked_board[:labels].size != board[:labels].size
                 board[:labels].each_with_index do |label, index|
 
-                  linked_issues = linked_board[:labels][index][:issues].map do |i|
+                  linked_issues = linked_board[:labels][label[:index]][:issues].map do |i|
                     i["repo"][:color] = l["color"]
                     i
                   end
