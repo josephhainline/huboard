@@ -16,7 +16,7 @@ module Stint
         label[:issues] = (x || []).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
 
         label[:issues].each do |issue|
-          log_issue_state(user_name, repo, issue, index)
+          log_issue_state(user_name, repo, issue, label[:index])
         end
 
         label
