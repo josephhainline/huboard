@@ -16,7 +16,7 @@ module Stint
         label[:issues] = (x || []).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
 
         label[:issues].each do |issue|
-          log_issue_state(user_name, repo, issue, label[:index])
+          log_issue_state(user_name, repo, issue, label[:index].to_i)
         end
 
         label
@@ -44,7 +44,7 @@ module Stint
                 next if linked_board[:labels].size != board[:labels].size
                 board[:labels].each_with_index do |label, index|
 
-                  linked_issues = linked_board[:labels][label[:index]][:issues].map do |i|
+                  linked_issues = linked_board[:labels][label[:index].to_i][:issues].map do |i|
                     i["repo"][:color] = l["color"]
                     i
                   end
@@ -86,13 +86,25 @@ module Stint
 
     def log_issue_changed_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      begin
+        post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      rescue
+        puts ""
+        puts "Crash! In log_issue_changed_state on issue: #{issue}."
+        puts ""
+      end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
     def log_issue_state(user_name, repo, issue, to_state_index)
       post_data = {"number" => issue['number']}
-      post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      begin
+        post_data["body"] = LabelStateHistory.get_body_with_state_history(issue["body"], to_state_index)
+      rescue
+        puts ""
+        puts "Crash! In log_issue_state on issue: #{issue}."
+        puts ""
+      end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
 
