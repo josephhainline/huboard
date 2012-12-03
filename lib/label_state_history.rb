@@ -68,7 +68,7 @@ class LabelStateHistory
   end
 
   def embed_label_state_history
-    return "\r\n<!---\r\n#{self.to_json}\r\n-->\r\n"
+    return "\r\n\r\n<!---\r\n#{self.to_json}\r\n-->\r\n"
   end
 
   def self.get_embedded_label_state_history(some_string)
@@ -78,7 +78,7 @@ class LabelStateHistory
   end
 
   def self.get_body_without_embedded_label_state_history(some_string)
-    history_regex = /(.*)\r\n<!---\r\n\{ 'label_state_history': \[(.*?)\] \}\r\n-->\r\n(.*)/m
+    history_regex = /(.*?)\s*<!---\s\{ 'label_state_history': \[(.*?)\] \}\s-->\s*(.*?)/m
     m = history_regex.match(some_string)
     if m.nil?
       return some_string
