@@ -15,8 +15,11 @@ module Stint
         x = issues_by_label[label[:name]]
         label[:issues] = (x || []).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
 
-        label[:issues].each do |issue|
-          log_issue_state(user_name, repo, issue, label[:index].to_i)
+        queue_label_match = /(\d+)\s*-\s*.*/.match(label[:name])
+        if (!queue_label_match.nil?)
+          label[:issues].each do |issue|
+            log_issue_state(user_name, repo, issue, label[:index].to_i)
+          end
         end
 
         label
@@ -44,7 +47,7 @@ module Stint
                 next if linked_board[:labels].size != board[:labels].size
                 board[:labels].each_with_index do |label, index|
 
-                  linked_issues = linked_board[:labels][label[:index].to_i][:issues].map do |i|
+                  linked_issues = linked_board[:labels][index][:issues].map do |i|
                     i["repo"][:color] = l["color"]
                     i
                   end
@@ -92,6 +95,7 @@ module Stint
         puts ""
         puts "Crash! In log_issue_changed_state on issue: #{issue}."
         puts ""
+        return nil
       end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
@@ -104,6 +108,7 @@ module Stint
         puts ""
         puts "Crash! In log_issue_state on issue: #{issue}."
         puts ""
+        return nil
       end
       github.update_issue user_name, repo, post_data unless (post_data["body"].nil?)
     end
