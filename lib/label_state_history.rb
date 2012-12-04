@@ -78,7 +78,7 @@ class LabelStateHistory
   end
 
   def self.get_body_without_embedded_label_state_history(some_string)
-    history_regex = /(.*?)\s*<!---\s\{ 'label_state_history': \[(.*?)\] \}\s-->\s*(.*?)/m
+    history_regex = /(.*)\s*?<!---\s\{ 'label_state_history': \[(.*?)\] \}\s-->\s*(.*?)/m
     m = history_regex.match(some_string)
     if m.nil?
       return some_string
