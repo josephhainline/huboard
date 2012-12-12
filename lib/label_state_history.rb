@@ -68,7 +68,7 @@ class LabelStateHistory
   end
 
   def embed_label_state_history
-    return "\r\n\r\n<!---\r\n#{self.to_json}\r\n-->\r\n"
+    return "\n\n<!---\n#{self.to_json}\n-->\n"
   end
 
   def self.get_embedded_label_state_history(some_string)
