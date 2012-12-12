@@ -10,8 +10,6 @@ class LabelStateHistory
       init_zero
     elsif (args.size == 1)
       from_json(args[0])
-    elsif (args.size > 1)
-      init_with_history_array(args)
     end
   end
 
@@ -28,6 +26,7 @@ class LabelStateHistory
     new_state = LabelState.new(current_index, Time.now)
     @current_state_index = current_index
     @history_array.push new_state
+    @history_array
   end
 
   def get_time_in_state(index)
@@ -57,14 +56,14 @@ class LabelStateHistory
 
   def from_json(json_string)
     @history_array = Array.new
-    regex_history = /{ 'label_state_history': \[(.*)\] }/
-    m = regex_history.match(json_string)
-    str_array = m[1].split(",")
-    str_array.each do |label_state_json|
+    regex_history = /\{ 'label_state_history': \[(.*?)\] \}/m
+    m = json_string.scan(regex_history)[-1].first
+    m.split(',').each do |label_state_json|
       label_state = LabelState.new(label_state_json)
       @history_array.push(label_state)
     end
-    @current_state_index = Integer(@history_array[-1].label_index)
+    @current_state_index = @history_array[-1].label_index.to_i
+    @current_state_index
   end
 
   def embed_label_state_history
@@ -78,12 +77,13 @@ class LabelStateHistory
   end
 
   def self.get_body_without_embedded_label_state_history(some_string)
-    history_regex = /(.*)\s*?<!---\s\{ 'label_state_history': \[(.*?)\] \}\s-->\s*(.*?)/m
+    history_regex = /(.*?)(?:\s*<!---\s*\{\s*'label_state_history':\s*\[(.*?)\]\s*\}\s*-->\s*)+(.*)/m
+
     m = history_regex.match(some_string)
     if m.nil?
       return some_string
     else
-      return m[1] + m[3]
+      return m[1] + m[-1]
     end
   end
 

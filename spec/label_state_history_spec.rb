@@ -11,12 +11,12 @@ describe LabelStateHistory do
   end
 
   describe 'deserializing input from JSON' do
-    json_lsh = "<!--- { 'label_state_history': [{ \"40\" : \"2012-12-05 17:53:30 +0000\" }] } -->"
+    json_lsh = %Q{{ 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" }] }}
     subject { described_class.new(json_lsh) }
 
-    it "has a history array with one element equal to 40" do
-      subject.history_array.count.should == 1
-      subject.current_state_index.should == 40
+    it "has a history array with one element equal to 50" do
+      subject.history_array.count.should == 2
+      subject.current_state_index.should == 50
     end
   end
 
@@ -91,6 +91,32 @@ describe LabelStateHistory do
           end
         end
 
+        context 'when there is a huboard value in the body' do
+        end
+
+        context 'an example with two label state histories' do
+          let(:old_body) { main_body + previous_label_state_history }
+          let(:main_body) { 'this is my body' }
+          let(:previous_label_state_history) do %Q{
+<!---
+{ 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" }] }
+-->
+<!---
+{ 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" }] }
+-->
+}
+          end
+          let(:expected_label_state_history) do %Q{
+<!---
+{ 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" },{ "#{index}" : "#{mock_time}" }] }
+-->
+}
+          end
+
+          it 'replaces all the label histories with a single updated history' do
+            subject.should == main_body + "\n" + expected_label_state_history
+          end
+        end
       end
 
       context 'that does not need to be updated' do
