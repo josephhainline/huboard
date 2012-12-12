@@ -43,31 +43,51 @@ describe LabelStateHistory do
   describe 'getting the body with state history' do
     subject { described_class.get_body_with_state_history(old_body, index) }
 
-    let(:index) { 42 }
     let(:mock_time) { mock 'time' }
 
     before do
       Time.stub(:now) { mock_time }
     end
 
-    context 'a body with existing label state history that needs to be updated' do
+    context 'a body with existing label state history' do
       let(:old_body) do %q{<!---
 { 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" }] }
--->'}
+-->}
       end
 
-      it 'adds a new entry at the end of the history' do
-        subject.should == %Q{
+      context 'that needs to be updated' do
+        let(:index) { 42 }
+
+        it 'adds a new entry at the end of the history' do
+          subject.should == %Q{
 
 <!---
 { 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" },{ "#{index}" : "#{mock_time}" }] }
 -->
 }
 
+        end
+
+        context 'that does not need to be updated' do
+          let(:index) { 50 }
+
+          it 'returns nil' do
+            subject.should be_nil
+          end
+        end
       end
     end
 
-    context 'a body with existing label state history that does not need to be updated'
-    context 'no label state history'
+    context 'no label state history' do
+      let(:old_body) { 'this is a body with no label state history' }
+      let(:index) { 42 }
+
+      it 'should add a new label_state_history object' do
+        subject.should == %Q{#{old_body}\n\n<!---
+{ 'label_state_history': [{ "#{index}" : "#{mock_time}" }] }
+-->
+}
+      end
+    end
   end
 end
