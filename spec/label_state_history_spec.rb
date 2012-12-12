@@ -61,6 +61,7 @@ describe LabelStateHistory do
         it 'adds a new entry at the end of the history' do
           subject.should == %Q{
 
+
 <!---
 { 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" },{ "#{index}" : "#{mock_time}" }] }
 -->
@@ -73,7 +74,8 @@ describe LabelStateHistory do
 1. ~~The "modified by" property is not contained in server response~~
 1. Detail View is not updating favorite/unfavorite button when state changed in another tab.  This is true for both "My Drive" and "Search", thus if detail views are open for a particular file off both the "Search" and "My Drive" tabs, changes to a file in one tab won't be reflected in the detail view of the other tab even though that other tab's directory view is updated.  This failure to update the detail view doesn't only happen off the "Search" tab but also off of the "My Drive" tab.
 1. ~~"Created on" not being populated~~} }
-          let(:after_body) { %Q{<!---
+          let(:after_body) { %Q{
+<!---
 @huboard:{"order":73.0}
 -->}
           }
@@ -117,7 +119,7 @@ describe LabelStateHistory do
           end
 
           it 'replaces all the label histories with a single updated history' do
-            subject.should == main_body + "\n" + expected_label_state_history
+            subject.should == main_body + "\n\n" + expected_label_state_history
           end
         end
       end

@@ -83,7 +83,7 @@ class LabelStateHistory
     if m.nil?
       return some_string
     else
-      return m[1] + m[-1]
+      return [m[1], m[-1]].join("\n")
     end
   end
 
