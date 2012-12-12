@@ -2,7 +2,7 @@ require './lib/label_state.rb'
 require 'time'
 
 class LabelStateHistory
-  attr_accessor :history_array, :current_state_index
+  attr_reader :history_array, :current_state_index
 
   def initialize (*args)
     @current_state_index = -1
