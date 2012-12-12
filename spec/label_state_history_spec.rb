@@ -65,15 +65,39 @@ describe LabelStateHistory do
 { 'label_state_history': [{ "40" : "2012-12-05 17:53:30 +0000" },{ "50" : "2012-12-11 15:57:43 +0000" },{ "#{index}" : "#{mock_time}" }] }
 -->
 }
-
         end
 
-        context 'that does not need to be updated' do
+        context 'a nasty example' do
           let(:index) { 50 }
+          let(:main_body) { %Q{1. ~~The "is favorited" field does not seem to be being returned in search results server response.~~
+1. ~~The "modified by" property is not contained in server response~~
+1. Detail View is not updating favorite/unfavorite button when state changed in another tab.  This is true for both "My Drive" and "Search", thus if detail views are open for a particular file off both the "Search" and "My Drive" tabs, changes to a file in one tab won't be reflected in the detail view of the other tab even though that other tab's directory view is updated.  This failure to update the detail view doesn't only happen off the "Search" tab but also off of the "My Drive" tab.
+1. ~~"Created on" not being populated~~} }
 
-          it 'returns nil' do
-            subject.should be_nil
+          let(:previous_label_state_history) { %Q{<!---
+{ 'label_state_history': [{ "40" : "2012-12-10 16:18:44 +0000" },{ "50" : "2012-12-11 20:13:25 +0000" },{ "40" : "2012-12-12 12:46:56 +0000" }] }
+-->} }
+
+          let(:expected_label_state_history) { %Q{
+
+<!---
+{ 'label_state_history': [{ "40" : "2012-12-10 16:18:44 +0000" },{ "50" : "2012-12-11 20:13:25 +0000" },{ "40" : "2012-12-12 12:46:56 +0000" },{ "#{index}" : "#{mock_time}" }] }
+-->}}
+
+          let(:old_body) { main_body + previous_label_state_history }
+
+          it 'replaces the label history with an updated history' do
+            subject.should == main_body + expected_label_state_history + "\n"
           end
+        end
+
+      end
+
+      context 'that does not need to be updated' do
+        let(:index) { 50 }
+
+        it 'returns nil' do
+          subject.should be_nil
         end
       end
     end
