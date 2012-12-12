@@ -88,7 +88,6 @@ class LabelStateHistory
   end
 
   def self.get_body_with_state_history(old_body, index)
-    debugger
     lsh_json = self.get_embedded_label_state_history(old_body)
     if (lsh_json.nil?) #if nil, we'll need to record current state
       lsh = LabelStateHistory.new
