@@ -13,7 +13,8 @@
     outline: 0;
     background: #fff;
     vertical-align: baseline;
-    line-height: 40px;
+    //line-height: 40px;
+    line-height: 0px;
     margin: 0;
     padding:0;
     font-size: 24px;
@@ -21,7 +22,8 @@
 }
 .assignee {
   list-style: none;
-  line-height: 40px;
+  line-height: 0px;
+  //line-height: 40px;
   float:left;
   margin:0 2px;
   cursor:pointer;
