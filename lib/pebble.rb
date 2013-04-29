@@ -100,8 +100,18 @@ module Stint
                   label[:issues] = label[:issues].concat(linked_issues).sort_by { |i|
                     i["_data"]["order"] || i["number"].to_f
                   }
-                  puts "Full label: #{label}!"
+                  #puts "Full label: #{label}!"
                   puts "Full label[:issues]: #{label[:issues]}!"
+
+                  num = 1
+                  if (label[:name] =~ /coding/i)
+                    puts "found coding!"
+                    label[:issues].each do |ordered_issue|
+                      ordered_issue[:story_point_number] = num
+                      num += 2
+                      puts "num: #{num}"
+                    end
+                  end
                 end
                 board[:milestones].concat(linked_board[:milestones]).sort_by { |m| m["_data"]["order"] || m["number"].to_f}
                 board[:other_labels].concat(linked_board[:other_labels])
