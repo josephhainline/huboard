@@ -12,6 +12,7 @@
 <% if(milestone) { %>
 <div class="milestone">
    backlogMile: <%= milestone.title %>
+    <p>SPN: <%= milestone.story_point_number %></p>
 </div>
 <% } %>
 <% if (pull_request.html_url) { %><span class="label label-info">Pull request</span> <%}%>
