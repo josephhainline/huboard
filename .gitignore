@@ -9,4 +9,4 @@ log/
 app.build.js
 .powenv
 .idea
-
+node_modules/
