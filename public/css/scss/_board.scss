@@ -196,17 +196,17 @@
     vertical-align: bottom;
     bottom:5px;
     right: 5px;
-    font-size:2em;
+    font-size:1em;
+    color: $red;
   }               
 }
-
 
 .column li a.close {
   position: absolute;
   top: 12px;
   right: 3px;
   width: 16px;
-  font-size:48px;
+  font-size:24px;
   opacity:0.0;
 }
 .column li:hover a.close {
