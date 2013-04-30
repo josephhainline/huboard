@@ -103,7 +103,7 @@ module Stint
                   }
                   puts "Full label[:issues]: #{label[:issues]}!"
 
-                  if (label[:name] =~ /coding/i)
+                  if (label[:name] =~ /coding/i || label[:name] =~ /blocked/i)
                     puts "found coding!"
                     label[:issues].each do |ordered_issue|
                       num += 1
