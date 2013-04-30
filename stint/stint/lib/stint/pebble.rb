@@ -41,7 +41,18 @@ module Stint
                     i
                   end
 
-                  label[:issues] = label[:issues].concat(linked_issues).sort_by { |i| i["_data"]["order"] || i["number"].to_f}
+                  label[:issues] = label[:issues].concat(linked_issues).sort_by {
+                      |i| i["_data"]["order"] || i["number"].to_f
+                  }
+
+                  if (label[:name] =~ /coding/i || label[:name] =~ /blocked/i)
+                    #puts "found coding!"
+                    label[:issues].each do |ordered_issue|
+                      num += 1
+                      #puts "num: #{num}"
+                      ordered_issue[:story_point_number] = num.to_s
+                    end
+                  end
                 end 
                 board[:milestones].concat(linked_board[:milestones]).sort_by { |m| m["_data"]["order"] || m["number"].to_f}
 
