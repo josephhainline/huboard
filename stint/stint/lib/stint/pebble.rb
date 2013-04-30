@@ -45,14 +45,18 @@ module Stint
                       |i| i["_data"]["order"] || i["number"].to_f
                   }
 
+                  puts "\n\nfull label: #{label}...\n\n"
+
                   if (label[:name] =~ /coding/i || label[:name] =~ /blocked/i)
-                    #puts "found coding!"
+                    puts "\n\n--coding or blocked--\n\n"
                     label[:issues].each do |ordered_issue|
                       num += 1
-                      #puts "num: #{num}"
+                      puts "num: #{num}"
                       ordered_issue[:story_point_number] = num.to_s
                     end
                   end
+
+                  puts "\n\nfull label after: #{label}...\n\n"
                 end 
                 board[:milestones].concat(linked_board[:milestones]).sort_by { |m| m["_data"]["order"] || m["number"].to_f}
 
