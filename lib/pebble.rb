@@ -110,8 +110,6 @@ module Stint
                       puts "num: #{num}"
                       ordered_issue[:story_point_number] = num.to_s
                     end
-                  else
-                    ordered_issue
                   end
 
                   puts "Full label after[:issues]: #{label[:issues]}!"
