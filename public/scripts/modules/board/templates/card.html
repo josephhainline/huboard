@@ -12,14 +12,16 @@
 <% if(milestone) { %>
 <div class="milestone">
    boardMile: <%= milestone.title %>
+</div>
+<% } %>
 
+<div class="milestone">
    title: <%= title %>
    SPN: <%= story_point_number %>
    number: <%= number %>
    url: <%= url %>
-
 </div>
-<% } %>
+
 <% if(pull_request.html_url) { %>
   <span class="label label-info">Pull request</span>
 <% } %>
