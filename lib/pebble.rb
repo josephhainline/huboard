@@ -106,7 +106,7 @@ module Stint
                   if (label[:name] =~ /coding/i)
                     puts "found coding!"
                     label[:issues].each do |ordered_issue|
-                      ordered_issue[:story_point_number] = num
+                      ordered_issue[:story_point_number] = num.to_s
                       num += 2
                       puts "num: #{num}"
                     end
