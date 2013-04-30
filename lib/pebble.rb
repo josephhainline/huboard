@@ -78,6 +78,7 @@ module Stint
     end
 
     def board(user_name, repo)
+        num = 1
         labels = github.labels(user_name,repo)
 
         board = build_board(user_name, repo)
@@ -102,11 +103,10 @@ module Stint
                   }
                   puts "Full label[:issues]: #{label[:issues]}!"
 
-                  num = 1
                   if (label[:name] =~ /coding/i)
                     puts "found coding!"
                     label[:issues].each do |ordered_issue|
-                      num += 2
+                      num += 1
                       puts "num: #{num}"
                       ordered_issue[:story_point_number] = num.to_s
                     end
